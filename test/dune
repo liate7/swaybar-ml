@@ -1,0 +1,15 @@
+(test
+ (name test_swaybar_ml)
+ (libraries
+  eio
+  eio_linux
+  eio_main
+  containers
+  cmdliner
+  yojson
+  obus
+  timedesc
+  cohttp
+  cohttp-eio)
+ (preprocess
+  (pps ppx_inline_test ppx_expect ppx_string ppx_compare ppx_yojson_conv)))

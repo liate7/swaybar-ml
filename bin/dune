@@ -1,0 +1,17 @@
+(executable
+ (public_name swaybar_ml)
+ (name main)
+ (libraries
+  swaybar_ml
+  eio
+  eio_linux
+  eio_main
+  containers
+  cmdliner
+  yojson
+  obus
+  timedesc
+  cohttp
+  cohttp-eio)
+ (preprocess
+  (pps ppx_inline_test ppx_expect ppx_string ppx_compare ppx_yojson_conv)))

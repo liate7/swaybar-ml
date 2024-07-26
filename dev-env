@@ -1,0 +1,3 @@
+#!/bin/sh
+
+OCAMLPATH='' opam exec -- guix shell --manifest=$(dirname "$0")/manifest.scm "$@"
