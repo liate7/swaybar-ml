@@ -32,6 +32,7 @@
 (packages->manifest
  (xcons (map specification->package
              '("gcc-toolchain" "autoconf" "rlwrap"
+               "pkg-config"
                "gmp"))
         ;; for zarith
         cc))

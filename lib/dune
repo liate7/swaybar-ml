@@ -13,6 +13,8 @@
   obus
   obus.upower
   timedesc
+  tls-eio
+  mirage-crypto-rng-eio
   cohttp
   cohttp-eio)
  (preprocess

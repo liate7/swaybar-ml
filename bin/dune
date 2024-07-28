@@ -6,10 +6,12 @@
   eio
   eio_linux
   eio_main
+  lwt_eio
   containers
   cmdliner
   yojson
   obus
+  obus.upower
   timedesc
   cohttp
   cohttp-eio)

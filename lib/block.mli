@@ -46,11 +46,13 @@ val create_message :
   string ->
   message
 
-type 'state t = {
+type 'state t' = {
   init : 'state;
   update : 'state -> message * 'state;
   update_interval_s : float;
   update_reasons : (unit -> unit) List.t;
 }
 
-val run : [> Eio.Time.Mono.ty ] r -> message Eio.Stream.t -> 'state t -> 'a
+type t = Block : 'state t' -> t
+
+val run : [> Eio.Time.Mono.ty ] r -> message Eio.Stream.t -> t -> 'a

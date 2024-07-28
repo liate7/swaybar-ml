@@ -76,14 +76,17 @@ let create_message ?short_text ?color ?background ?border ?(border_top = 1)
     markup;
   }
 
-type 'state t = {
+type 'state t' = {
   init : 'state;
   update : 'state -> message * 'state;
   update_interval_s : float;
   update_reasons : (unit -> unit) List.t;
 }
 
-let run mono stream { init; update; update_interval_s; update_reasons } =
+type t = Block : 'state t' -> t
+
+let run mono stream (Block { init; update; update_interval_s; update_reasons })
+    =
   let sleep () = Eio.Time.Mono.sleep mono update_interval_s in
   let rec loop state =
     let message, state = update state in
