@@ -10,6 +10,7 @@
   cmdliner
   yojson
   ppx_yojson_conv
+  stringext
   obus
   obus.upower
   timedesc

@@ -228,7 +228,7 @@ let progress_bar ~current ~total width =
   ret
 
 let do_block_update net addr =
-  match
+  let fetch () =
     with_mpd_socket net addr @@ fun sock buf ->
     let* status = command "status" read_status sock buf in
     match status.playing with
@@ -236,7 +236,8 @@ let do_block_update net addr =
         let+ current_song = command "currentsong" read_song sock buf in
         (status, Some (playing, current_song))
     | None -> Ok (status, None)
-  with
+  in
+  match fetch () with
   | Ok (status, Some (playing, current_song)) ->
       let full_text =
         Printf.sprintf "%s %s %.0f%s%s"

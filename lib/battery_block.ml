@@ -10,7 +10,7 @@ let time_to_string secs =
   make ~s:secs () |> For_human.to_string ~format:"{hours:X:}{mins:0X}"
 
 (* TODO: make this reactive? *)
-let create ~update_interval battery ~urgent_under =
+let create (_ : Lwt_eio.Token.t) ~update_interval battery ~urgent_under =
   let update () =
     let percentage, state, to_empty, to_full =
       Lwt_eio.run_lwt @@ fun () ->

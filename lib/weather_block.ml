@@ -13,22 +13,19 @@ type forecast = {
   percent_precipitation : float;
 }
 
+let ( $-> ) obj mem = Yojson.Safe.Util.member mem obj
+
 let forecast_of_yojson json =
   let module Json = Yojson.Safe.Util in
   {
     start_time =
-      json |> Json.member "startTime" |> Json.to_string
-      |> Timedesc.of_iso8601_exn;
-    end_time =
-      json |> Json.member "endTime" |> Json.to_string |> Timedesc.of_iso8601_exn;
-    temperature = json |> Json.member "temperature" |> Json.to_number;
-    temperature_unit = json |> Json.member "temperatureUnit" |> Json.to_string;
-    short_forecast = json |> Json.member "shortForecast" |> Json.to_string;
+      json $-> "startTime" |> Json.to_string |> Timedesc.of_iso8601_exn;
+    end_time = json $-> "endTime" |> Json.to_string |> Timedesc.of_iso8601_exn;
+    temperature = json $-> "temperature" |> Json.to_number;
+    temperature_unit = json $-> "temperatureUnit" |> Json.to_string;
+    short_forecast = json $-> "shortForecast" |> Json.to_string;
     percent_precipitation =
-      json
-      |> Json.path [ "probabilityOfPrecipitation"; "value" ]
-      |> Option.get_exn_or "percent_precipitation"
-      |> Json.to_number;
+      json $-> "probabilityOfPrecipitation" $-> "value" |> Json.to_number;
   }
 
 let forecasts_to_show clock tz forecasts =
@@ -75,17 +72,15 @@ let create ~client update_interval clock tz uri =
   let update old =
     try
       Switch.run @@ fun sw ->
-      let resp, body = Client.get ~sw ~headers client uri in
-      match resp.Response.status with
-      | `OK ->
+      match Client.get ~sw ~headers client uri with
+      | { Response.status = `OK; _ }, body ->
           let json =
             Eio.Buf_read.(parse_exn take_all) ~max_size:Int.max_int body
             |> Yojson.Safe.from_string
           in
           let module Json = Yojson.Safe.Util in
           let forecasts =
-            json |> Json.member "properties" |> Json.member "periods"
-            |> [%of_yojson: forecast list]
+            json $-> "properties" $-> "periods" |> [%of_yojson: forecast list]
           in
           (create_message (forecasts_to_show clock tz forecasts), forecasts)
       | _ -> (create_message (forecasts_to_show clock tz old), old)
