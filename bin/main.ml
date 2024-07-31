@@ -24,8 +24,8 @@ let main lwt_tok env =
     [
       Mpd_block.create 15. env#net (`Tcp (Eio.Net.Ipaddr.V4.loopback, 6600));
       Weather_block.create ~client (minutes 5.) clock tz uri;
-      Battery_block.create lwt_tok ~update_interval:5. ~urgent_under:19L
-        display_bat;
+      Battery_block.create lwt_tok display_bat ~update_interval:5.
+        ~urgent_under:Int64.(19L * 60L);
       Clock_block.create 0.5 clock tz ~full_format ~short_format;
     ]
 
