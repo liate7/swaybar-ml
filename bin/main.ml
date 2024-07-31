@@ -4,31 +4,16 @@ module Stdenv = Eio.Stdenv
 open Swaybar_ml
 open Cohttp_eio
 
-let https ~certs_dir =
-  let authenticator = X509_eio.authenticator (`Ca_dir certs_dir) in
-  let tls_config = Tls.Config.client ~authenticator () in
-  fun uri raw ->
-    let host =
-      Uri.host uri
-      |> Option.map (fun x -> Domain_name.(host_exn (of_string_exn x)))
-    in
-    Tls_eio.client_of_flow ?host tls_config raw
-
 let minutes n = n *. 60.
 
 let main lwt_tok env =
   let client =
     let certs_dir = Eio.Path.(env#fs / Unix.getenv "SSL_CERT_DIR") in
-    Client.make ~https:(Some (https ~certs_dir)) env#net
-  and uri =
-    Uri.of_string "https://api.weather.gov/gridpoints/RNK/99,76/forecast/hourly"
+    Client.make ~https:(Some (Weather_block.https ~certs_dir)) env#net
+  and uri = Weather_block.hourly_forecast_uri "RNK" (99, 76)
   and display_bat =
-    Lwt_eio.run_lwt @@ fun () ->
-    let ( let+ ) = Lwt.( >|= ) and ( >|= ) = Lwt.( >|= ) in
-    let+ peer = UPower.daemon () >|= UPower.to_peer in
-    OBus_proxy.make ~peer
-      ~path:[ "org"; "freedesktop"; "UPower"; "devices"; "DisplayDevice" ]
-    |> UPower_device.of_proxy
+    Battery_block.battery_at_path lwt_tok
+      [ "org"; "freedesktop"; "UPower"; "devices"; "DisplayDevice" ]
   and clock = env#clock
   and tz = Timedesc.Time_zone.make_exn "America/New_York"
   and full_format =

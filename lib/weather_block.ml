@@ -93,3 +93,19 @@ let create ~client update_interval clock tz uri =
       update_interval_s = update_interval;
       update_reasons = [];
     }
+
+let https ~certs_dir =
+  let authenticator = X509_eio.authenticator (`Ca_dir certs_dir) in
+  let tls_config = Tls.Config.client ~authenticator () in
+  fun uri raw ->
+    let host =
+      Uri.host uri
+      |> Option.map (fun x -> Domain_name.(host_exn (of_string_exn x)))
+    in
+    Tls_eio.client_of_flow ?host tls_config raw
+
+let hourly_forecast_uri forecast_office (x, y) =
+  Uri.of_string
+  @@ Printf.sprintf
+       "https://api.weather.gov/gridpoints/%s/%d,%d/forecast/hourly"
+       forecast_office x y

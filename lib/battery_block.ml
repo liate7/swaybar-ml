@@ -46,3 +46,9 @@ let create (_ : Lwt_eio.Token.t) ~update_interval battery ~urgent_under =
       update_interval_s = update_interval;
       update_reasons = [];
     }
+
+let battery_at_path (_ : Lwt_eio.Token.t) path =
+  Lwt_eio.run_lwt @@ fun () ->
+  let ( let+ ) = Lwt.( >|= ) and ( >|= ) = Lwt.( >|= ) in
+  let+ peer = UPower.daemon () >|= UPower.to_peer in
+  OBus_proxy.make ~peer ~path |> UPower_device.of_proxy
