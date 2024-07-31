@@ -16,7 +16,7 @@ let https ~certs_dir =
 
 let minutes n = n *. 60.
 
-let main env =
+let main lwt_tok env =
   let client =
     let certs_dir = Eio.Path.(env#fs / Unix.getenv "SSL_CERT_DIR") in
     Client.make ~https:(Some (https ~certs_dir)) env#net
@@ -39,11 +39,12 @@ let main env =
     [
       Mpd_block.create 15. env#net (`Tcp (Eio.Net.Ipaddr.V4.loopback, 6600));
       Weather_block.create ~client (minutes 5.) clock tz uri;
-      Battery_block.create ~update_interval:5. ~urgent_under:19L display_bat;
+      Battery_block.create lwt_tok ~update_interval:5. ~urgent_under:19L
+        display_bat;
       Clock_block.create 0.5 clock tz ~full_format ~short_format;
     ]
 
 let () =
   Eio_linux.run @@ fun env ->
   Mirage_crypto_rng_eio.run (module Mirage_crypto_rng.Fortuna) env @@ fun () ->
-  Lwt_eio.with_event_loop ~clock:env#clock @@ fun _ -> main env
+  Lwt_eio.with_event_loop ~clock:env#clock @@ fun tok -> main tok env
