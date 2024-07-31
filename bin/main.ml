@@ -46,5 +46,11 @@ let main lwt_tok env =
 
 let () =
   Eio_linux.run @@ fun env ->
-  Mirage_crypto_rng_eio.run (module Mirage_crypto_rng.Fortuna) env @@ fun () ->
+  Mirage_crypto_rng_eio.run
+    (module Mirage_crypto_rng.Fortuna)
+    (env
+      :> < clock : [> ] Eio.Time.clock
+         ; mono_clock : [> ] Eio.Time.Mono.t
+         ; secure_random : [> ] Eio.Flow.source >)
+  @@ fun () ->
   Lwt_eio.with_event_loop ~clock:env#clock @@ fun tok -> main tok env
