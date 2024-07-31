@@ -83,8 +83,18 @@ let create ~client update_interval clock tz uri =
             json $-> "properties" $-> "periods" |> [%of_yojson: forecast list]
           in
           (create_message (forecasts_to_show clock tz forecasts), forecasts)
-      | _ -> (create_message (forecasts_to_show clock tz old), old)
-    with _ -> (create_message (forecasts_to_show clock tz old), old)
+      | { Response.status; _ }, _ ->
+          traceln "Error getting weather info from %s: %d, %s"
+            (Uri.to_string uri)
+            (Code.code_of_status status)
+            Code.(code_of_status status |> reason_phrase_of_code);
+          (create_message (forecasts_to_show clock tz old), old)
+    with
+    | ( Eio.Io _ | Yojson.Json_error _ | End_of_file
+      | Yojson.Safe.Util.Type_error _ ) as exn
+    ->
+      traceln "Error getting weather info: %s" @@ Printexc.to_string exn;
+      (create_message (forecasts_to_show clock tz old), old)
   in
   Block.Block
     {

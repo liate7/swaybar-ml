@@ -263,11 +263,14 @@ let do_block_update net addr =
   | Error err ->
       traceln "Error getting MPD info: %s" @@ error_to_string err;
       (Block.create_message "Error getting MPD info", ())
-  | exception _ -> (Block.create_message "Error getting MPD info", ())
+  | exception ((Eio.Io _ | End_of_file | Failure _) as exn) ->
+      traceln "Error getting MPD info: %s" @@ Printexc.to_string exn;
+      (Block.create_message "Error getting MPD info", ())
 
 let poll_idle net addr =
   try with_mpd_socket net addr @@ command "idle" read_idle |> ignore
-  with _ -> ()
+  with (Eio.Io _ | End_of_file | Failure _) as exn ->
+    traceln "Error in MPD idle: %s" @@ Printexc.to_string exn
 
 let create update_interval_s net addr =
   Block.Block
