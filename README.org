@@ -1,0 +1,2 @@
+Library for writing a swaybar ~status_command~,
+along with an example (read “my personal”) swaybar
