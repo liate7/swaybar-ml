@@ -91,7 +91,7 @@ let create ~client update_interval clock tz uri =
           (create_message (forecasts_to_show clock tz old), old)
     with
     | ( Eio.Io _ | Yojson.Json_error _ | End_of_file
-      | Yojson.Safe.Util.Type_error _ ) as exn
+      | Yojson.Safe.Util.Type_error _ | Failure _ ) as exn
     ->
       traceln "Error getting weather info: %s" @@ Printexc.to_string exn;
       (create_message (forecasts_to_show clock tz old), old)
