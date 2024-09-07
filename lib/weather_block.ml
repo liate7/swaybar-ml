@@ -106,13 +106,16 @@ let create ~client update_interval clock tz uri =
 
 let https ~certs_dir =
   let authenticator = X509_eio.authenticator (`Ca_dir certs_dir) in
-  let tls_config = Tls.Config.client ~authenticator () in
-  fun uri raw ->
-    let host =
-      Uri.host uri
-      |> Option.map (fun x -> Domain_name.(host_exn (of_string_exn x)))
-    in
-    Tls_eio.client_of_flow ?host tls_config raw
+  match Tls.Config.client ~authenticator () with
+  | Ok tls_config ->
+      Ok
+        (fun uri raw ->
+          let host =
+            Uri.host uri
+            |> Option.map (fun x -> Domain_name.(host_exn (of_string_exn x)))
+          in
+          Tls_eio.client_of_flow ?host tls_config raw)
+  | Error msg -> Error msg
 
 let hourly_forecast_uri forecast_office (x, y) =
   Uri.of_string

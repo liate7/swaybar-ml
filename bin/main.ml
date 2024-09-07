@@ -9,7 +9,9 @@ let minutes n = n *. 60.
 let main lwt_tok env =
   let client =
     let certs_dir = Eio.Path.(env#fs / Unix.getenv "SSL_CERT_DIR") in
-    Client.make ~https:(Some (Weather_block.https ~certs_dir)) env#net
+    Client.make
+      ~https:(Some (Weather_block.https ~certs_dir |> Result.get_exn))
+      env#net
   and uri = Weather_block.hourly_forecast_uri "RNK" (99, 76)
   and display_bat =
     Battery_block.battery_at_path lwt_tok
