@@ -19,10 +19,10 @@
           stringext
           obus timedesc cohttp cohttp-eio
           ppx_inline_test ppx_expect ppx_string ppx_compare ppx_yojson_conv
-          tls-eio mirage-crypto-rng-eio
-          (ocamlformat :dev) (merlin :dev) (utop :dev) (ocaml-print-intf :dev))
+          tls-eio mirage-crypto-rng)
  ; (tags
  ;  (topics "to describe" your project))
 )
 
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project
+(subst disabled)
