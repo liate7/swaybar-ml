@@ -67,6 +67,6 @@ let () =
      Eio.Path.(load (Eio.Stdenv.fs env / "/etc" / "hostname")) |> String.trim
    with
   | "virga" -> virga_main
-  | "nostalgia-for-inf-0" -> nostalgia_main
+  | "kalantha" | "nostalgia-for-inf-0" -> nostalgia_main
   | host -> failwith (Printf.sprintf "Host \"%s\" not supported" host))
     tok env
