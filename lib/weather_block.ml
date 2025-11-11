@@ -35,10 +35,10 @@ let forecasts_to_show clock tz forecasts =
            (Eio.Time.now clock
            |> Timedesc.of_timestamp_float_s_exn ~tz_of_date_time:tz)
          < 0)
-  |> List.take 2
 
-let full_message now next =
-  Printf.sprintf "%d: %.0f°%s, %s (%.0f%%); %d: %.0f°%s, %s (%.0f%%)"
+let full_message old now next =
+  Printf.sprintf "%s%d: %.0f°%s, %s (%.0f%%); %d: %.0f°%s, %s (%.0f%%)"
+    (if old then "! " else "")
     (now.start_time |> Timedesc.hour)
     now.temperature now.temperature_unit now.short_forecast
     now.percent_precipitation
@@ -54,11 +54,13 @@ let short_message forecast =
     forecast.temperature forecast.temperature_unit
     forecast.percent_precipitation
 
-let create_message = function
+let create_message old = function
   | now :: next :: _ ->
       Block.create_message
-        ~short_text:(short_message now ^ "; " ^ short_message next)
-      @@ full_message now next
+        ~short_text:
+          ((if old then "! " else "")
+          ^ short_message now ^ "; " ^ short_message next)
+      @@ full_message old now next
   | _ -> Block.create_message "not enough forecasts"
 
 let headers =
@@ -82,19 +84,20 @@ let create ~client update_interval clock tz uri =
           let forecasts =
             json $-> "properties" $-> "periods" |> [%of_yojson: forecast list]
           in
-          (create_message (forecasts_to_show clock tz forecasts), forecasts)
+          ( create_message false (forecasts_to_show clock tz forecasts),
+            forecasts )
       | { Response.status; _ }, _ ->
           traceln "Error getting weather info from %s: %d, %s"
             (Uri.to_string uri)
             (Code.code_of_status status)
             Code.(code_of_status status |> reason_phrase_of_code);
-          (create_message (forecasts_to_show clock tz old), old)
+          (create_message true (forecasts_to_show clock tz old), old)
     with
     | ( Eio.Io _ | Yojson.Json_error _ | End_of_file
       | Yojson.Safe.Util.Type_error _ | Failure _ ) as exn
     ->
       traceln "Error getting weather info: %s" @@ Printexc.to_string exn;
-      (create_message (forecasts_to_show clock tz old), old)
+      (create_message true (forecasts_to_show clock tz old), old)
   in
   Block.Block
     {
