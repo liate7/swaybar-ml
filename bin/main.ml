@@ -61,7 +61,7 @@ let nostalgia_main lwt_tok env =
     ]
 
 let () =
-  Eio_linux.run @@ fun env ->
+  Eio_posix.run @@ fun env ->
   Mirage_crypto_rng_unix.use_default ();
   Lwt_eio.with_event_loop ~clock:env#clock @@ fun tok ->
   (match
