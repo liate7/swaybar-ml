@@ -20,8 +20,9 @@ let virga_main _lwt_tok env =
   and clock = env#clock
   and tz = Timedesc.Time_zone.make_exn "America/New_York"
   and full_format =
-    "{year}-{mon:0X}-{day:0X} ({wday:Xxx}, \
-     UTC{tzoff-sign}{tzoff-hour:0X}{tzoff-min:0X}) {hour:0X}:{min:0X}:{sec:0X}"
+    "{year}-{mon:0X}-{day:0X}"
+    ^ "({wday:Xxx}, UTC{tzoff-sign}{tzoff-hour:0X}{tzoff-min:0X})"
+    ^ " {hour:0X}:{min:0X}:{sec:0X}"
   and short_format = "--{mon:0X}-{day:0X} {hour:0X}:{min:0X}:{sec:0X}" in
   Swaybar.start env#mono_clock env#stdout
     [
